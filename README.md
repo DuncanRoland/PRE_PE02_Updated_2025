@@ -15,7 +15,7 @@ code gebruiken van online bronnen, maak dan gebruik van referenties.
 
 ### AI gebruik
 Het gebruik van AI-tools zoals ChatGPT, Copilot, Bard, etc. is niet toegestaan. Het gebruik van deze tools kan tot verdere acties leiden, zoals het opstarten van een fraudedossier.
-![Kader gebruik AI](opgave/image.png)
+![Kader gebruik AI](Opgave/image.png)
 
 ### GIT en code conventies
 Je werk wordt geëvalueerd op de gebruikelijke Git- en codeconventies. 
@@ -34,7 +34,7 @@ Maak twee nieuwe projecten aan genaamd "Pre.PEJobApplicationSystem.Cons" en "Pre
 
 ### Klassendiagram (/15)
 Maak het onderstaande klassendiagram volgens de geziene leerstof na in C#.
-![Klassendiagram](opgave/uml.svg)
+![Klassendiagram](Opgave/uml.svg)
 
 Zorg ervoor dat alle elementen correct geïmplementeerd zijn volgens de geziene leerstof.
 
