@@ -34,7 +34,7 @@ Maak twee nieuwe projecten aan genaamd "Pre.PEJobApplicationSystem.Cons" en "Pre
 
 ### Klassendiagram (/15)
 Maak het onderstaande klassendiagram volgens de geziene leerstof na in C#.
-![Klassendiagram](Opgave/uml.svg)
+![Klassendiagram](Opgave/UML.svg)
 
 Zorg ervoor dat alle elementen correct geïmplementeerd zijn volgens de geziene leerstof.
 
