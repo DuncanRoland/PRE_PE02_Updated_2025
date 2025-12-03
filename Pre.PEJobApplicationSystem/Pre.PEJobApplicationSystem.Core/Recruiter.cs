@@ -1,8 +1,8 @@
 namespace Pre.PEJobApplicationSystem.Core;
 
-public class Recruiter
+public class Recruiter : Person
 {
-    public Recruiter(string firstName, string lastName, string email)
+    public Recruiter(string firstName, string lastName, string email) : base(firstName, lastName, email)
     {
     }
 
