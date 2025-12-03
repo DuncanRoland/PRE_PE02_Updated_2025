@@ -16,12 +16,12 @@ public class ApplicationManager : IApplicationManager
 
     public void AddCandidate(Candidate candidate)
     {
-        
+        _candidates.Add(candidate);
     }
 
     public void AddRecruiter(Recruiter recruiter)
     {
-        
+        Recruiters.Add(recruiter);
     }
 
     public void AddJobApplication(JobApplication jobApplication)

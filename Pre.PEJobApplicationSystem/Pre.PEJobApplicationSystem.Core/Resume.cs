@@ -16,5 +16,6 @@ public class Resume
 
     public void AddSkill(Skill skill)
     {
+        Skills.Add(skill);
     }
 }
