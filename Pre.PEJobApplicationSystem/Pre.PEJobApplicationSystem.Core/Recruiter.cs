@@ -8,11 +8,18 @@ public class Recruiter : Person
 
     public void PostJob(Company company, Job job)
     {
-        
+        company.Jobs =
+        [
+            job
+        ];
     }
 
-    public void ReviewApplication(JobApplication application)
+    public static void ReviewApplication(JobApplication application)
     {
+        if (application.Status == "Pending")
+        {
+            application.UpdateStatus("Top!");
+        }
         
     }
 }

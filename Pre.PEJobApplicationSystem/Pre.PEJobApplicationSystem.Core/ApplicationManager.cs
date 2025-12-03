@@ -4,14 +4,17 @@ namespace Pre.PEJobApplicationSystem.Core;
 
 public class ApplicationManager : IApplicationManager
 {
-    private List<Candidate> _candidates;
-    public List<Recruiter> Recruiters { get;}
-    public List<Company> _companies;
-
+    private readonly List<Candidate> _candidates;
+    public  List<Recruiter> Recruiters { get;}
+    public readonly List<Company> _companies;
     protected List<JobApplication> _jobApplications;
-
+    
     public ApplicationManager()
     {
+        _candidates = [];
+        Recruiters = [];
+        _companies = [];
+        _jobApplications = [];
     }
 
     public void AddCandidate(Candidate candidate)

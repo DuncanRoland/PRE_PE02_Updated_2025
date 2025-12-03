@@ -4,7 +4,8 @@ public class Company
 {
     public string Name { get; private set; }
     public string Industry { get; private set; }
-    public List<Job> Jobs { get; }
+    // added setter because I otherwise don't see how to add jobs to the list
+    public List<Job> Jobs { get; set; }
 
     public Company(string name, string industry)
     {
@@ -12,8 +13,9 @@ public class Company
         Industry = industry;
     }
 
-    protected void AddJob(Job job)
+    // made it public since i'm not sure how to test otherwise
+    public void AddJob(Job job)
     {
-        
+        Jobs.Add(job);
     }
 }

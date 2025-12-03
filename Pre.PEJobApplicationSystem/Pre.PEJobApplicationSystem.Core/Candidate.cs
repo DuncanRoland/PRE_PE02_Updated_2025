@@ -13,6 +13,9 @@ public class Candidate : Person
 
     public JobApplication ApplyForJob(Job job)
     {
-        return null;
+        var application = new JobApplication(this, job);
+        AppliedJobs.Add(application);
+        return application;
+ 
     }
 }
