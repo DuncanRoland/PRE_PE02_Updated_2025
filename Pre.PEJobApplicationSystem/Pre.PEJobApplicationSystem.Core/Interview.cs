@@ -8,7 +8,7 @@ public class Interview
 
     public Interview(Recruiter recruiter)
     {
-        Recruiter = recruiter;
+        Recruiter = recruiter ?? throw new ArgumentNullException(nameof(recruiter));
     }
 
     // setter zodat het ioverschreven kan worden

@@ -8,19 +8,18 @@ public class Recruiter : Person
 
     public void PostJob(Company company, Job job)
     {
-        company.Jobs =
-        [
-            job
-        ];
+        if (company == null) throw new InvalidOperationException("Recruiter has no company set.");
+        company.AddJob(job);
     }
 
-    public static void ReviewApplication(JobApplication application)
+    public void ReviewApplication(JobApplication application)
     {
-        if (application.Status == "Pending")
-        {
-            application.UpdateStatus("Top!");
-        }
-        
+        if (application == null) throw new ArgumentNullException(nameof(application));
+
+        var interview = new Interview(this);
+        interview.AddFeedback("Top!");
+        application.AddInterview(interview);
+
     }
 
     public override string GetInfo()
