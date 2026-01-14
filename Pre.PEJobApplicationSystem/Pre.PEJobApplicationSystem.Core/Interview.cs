@@ -3,7 +3,8 @@ namespace Pre.PEJobApplicationSystem.Core;
 public class Interview
 {
     public Recruiter Recruiter { get; }
-    public string Feedback { get; set; }
+    private string _feedback;
+    public string Feedback { get; }
 
     public Interview(Recruiter recruiter)
     {
@@ -13,7 +14,7 @@ public class Interview
     // setter zodat het ioverschreven kan worden
     public void AddFeedback(string feedback)
     {
-        Feedback = feedback;
+        _feedback = feedback ?? throw new ArgumentNullException(nameof(feedback));
         
     }
 }

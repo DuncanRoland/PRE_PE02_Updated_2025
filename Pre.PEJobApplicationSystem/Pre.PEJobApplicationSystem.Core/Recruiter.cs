@@ -22,4 +22,9 @@ public class Recruiter : Person
         }
         
     }
+
+    public override string GetInfo()
+    {
+        return $"{GetType().Name} - Name: {FullName}, Email: {Email}";
+    }
 }

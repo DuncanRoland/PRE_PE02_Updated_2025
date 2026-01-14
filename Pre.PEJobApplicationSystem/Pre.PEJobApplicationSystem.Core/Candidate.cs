@@ -18,4 +18,9 @@ public class Candidate : Person
         return application;
  
     }
+
+    public override string GetInfo()
+    {
+        return $"{GetType().Name} - Name: {FullName}, Email: {Email}";
+    }
 }
