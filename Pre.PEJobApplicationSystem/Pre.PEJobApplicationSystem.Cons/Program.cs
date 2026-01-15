@@ -1,4 +1,8 @@
-﻿using Pre.PEJobApplicationSystem.Core;
+﻿// csharp
+
+using System;
+using System.Collections.Generic;
+using Pre.PEJobApplicationSystem.Core;
 
 namespace Pre.PEJobApplicationSystem.Cons
 {
@@ -111,6 +115,24 @@ namespace Pre.PEJobApplicationSystem.Cons
             Console.WriteLine($"\nCandidate applied for: {application.Job.Title}");
             Console.WriteLine("Candidate AppliedJobs count: " + candidate.AppliedJobs.Count);
 
+            // Test JobApplication methods: UpdateStatus, ApplicationDate, AddInterview
+            Console.WriteLine("\nTesting JobApplication:");
+
+            Console.WriteLine("Initial status: " + (application.Status ?? "(null)"));
+            application.UpdateStatus("Pending");
+            Console.WriteLine("Updated status: " + application.Status);
+
+            Console.WriteLine("ApplicationDate <= now: " + (application.ApplicationDate <= DateTime.Now));
+
+            var interview = new Interview(recruiter);
+            interview.AddFeedback("Top!");
+            application.AddInterview(interview);
+            Console.WriteLine("Interview added: " + (application.Interview != null));
+
+            var feedback = application.Interview?.GetType().GetProperty("Feedback")?.GetValue(application.Interview) ??
+                           "(no feedback)";
+            Console.WriteLine("Interview feedback: " + feedback);
+
             // Check eligibility (should be false)
             Console.WriteLine("\nChecking candidate eligibility (expect false): " + job.IsCandidateEligible(candidate));
 
@@ -127,19 +149,6 @@ namespace Pre.PEJobApplicationSystem.Cons
             // Recruiter reviews the application (should add an Interview with feedback "Top!")
             recruiter.ReviewApplication(application);
             Console.WriteLine("\nRecruiter reviewed application.");
-
-            // Simple attempt to read any interview feedback (if Interview collection/property is public)
-            if (application is not null)
-            {
-                var interviewsProp = application.GetType().GetProperty("Interviews");
-                if (interviewsProp?.GetValue(application) is IEnumerable<Interview> interviews)
-                {
-                    foreach (var it in interviews)
-                        Console.WriteLine("Interview feedback: " +
-                                          (it.GetType().GetProperty("Feedback")?.GetValue(it) ??
-                                           "(no feedback property)"));
-                }
-            }
 
             // Resume tests: AddSkill and AddExperience (duplicate check)
             Console.WriteLine("\nResume skills before: " + resume.Skills.Count);
