@@ -1,6 +1,4 @@
-﻿// csharp
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Pre.PEJobApplicationSystem.Core;
 
@@ -129,8 +127,7 @@ namespace Pre.PEJobApplicationSystem.Cons
             application.AddInterview(interview);
             Console.WriteLine("Interview added: " + (application.Interview != null));
 
-            var feedback = application.Interview?.GetType().GetProperty("Feedback")?.GetValue(application.Interview) ??
-                           "(no feedback)";
+            var feedback = application.Interview?.Feedback ?? "(no feedback)";
             Console.WriteLine("Interview feedback: " + feedback);
 
             // Check eligibility (should be false)
@@ -145,6 +142,22 @@ namespace Pre.PEJobApplicationSystem.Cons
 
             Console.WriteLine("Candidate AppliedJobs count after additional applies: " + candidate.AppliedJobs.Count);
             Console.WriteLine("Checking candidate eligibility (expect true): " + job.IsCandidateEligible(candidate));
+
+            // --- NEW: test ApplicationManager.GetJobApplicationsForJob and GetApplicationForJob ---
+            var appsForThisJob = manager.GetJobApplicationsForJob(job);
+            Console.WriteLine($"\nManager reports {appsForThisJob.Count} job applications for job '{job.Title}':");
+            for (int i = 0; i < appsForThisJob.Count; i++)
+            {
+                var ja = appsForThisJob[i];
+                var candName = ja.Candidate != null ? ja.Candidate.FullName : "(unknown)";
+                Console.WriteLine($" - #{i + 1}: Candidate: {candName}, Status: {(ja.Status ?? "(null)")}");
+            }
+
+            var firstForJob = manager.GetJobApplicationsForJob(job);
+            Console.WriteLine("\nFirst application for job (GetApplicationForJob): " +
+                              (firstForJob == null
+                                  ? "(none)"
+                                  : $"{job.Title}"));
 
             // Recruiter reviews the application (should add an Interview with feedback "Top!")
             recruiter.ReviewApplication(application);
