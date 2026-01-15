@@ -17,6 +17,6 @@ public class WorkExperience
 
     public int GetExperienceInYears()
     {
-        return 0;
+        return  EndDate.Year - StartDate.Year;
     }
 }

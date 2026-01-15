@@ -1,194 +1,85 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Pre.PEJobApplicationSystem.Core;
+﻿using Pre.PEJobApplicationSystem.Core;
 
-namespace Pre.PEJobApplicationSystem.Cons;
-
-public class Program
+namespace Pre.PEJobApplicationSystem.Cons
 {
-    static void Main(string[] args)
+    internal class Program
     {
-        var skills = new List<Skill>
+        private static void Main()
         {
-            new("C# Programming", 5),
-            new("JavaScript Programming", 5)
-        };
+            // Setup basic objects
+            var skills = new List<Skill> { new Skill("C# Programming", 5), new Skill("JavaScript Programming", 5) };
+            var resume = new Resume(skills);
 
-        var resumeDuncan = new Resume(skills);
+            var candidate = new Candidate("Duncan", "Roland", "Duncan.roland@student.howest.be", resume);
+            var recruiter = new Recruiter("Sofie", "De Smet", "Sofie@desmet.be");
 
-        var candidate1 = new Candidate("Duncan", "Roland", "Duncan.roland@student.howest.be", resumeDuncan);
-        var recruiter1 = new Recruiter("Sofie", "De Smet", "Sofie@desmet.be");
+            var manager = new ApplicationManager();
+            manager.AddCandidate(candidate);
+            manager.AddRecruiter(recruiter);
 
-        var manager = new ApplicationManager();
+            Console.WriteLine("Candidate added: " + candidate.GetInfo());
+            Console.WriteLine("Recruiter added: " + recruiter.GetInfo());
 
-        var candidates = new List<Candidate> { candidate1 };
-        var recruiters = new List<Recruiter> { recruiter1 };
-        var companies = new List<Company>();
-        var jobApplications = new List<JobApplication>();
+            // Create company and job, post it
+            var job = new Job("Software Developer", "Develop apps", 40000, 70000, skills);
+            var company = new Company("Howest", "IT");
+            company.AddJob(job);
+            recruiter.PostJob(company, job);
+            Console.WriteLine($"Posted job '{job.Title}' at {company.Name}");
 
-        manager.AddCandidate(candidate1);
-        manager.AddRecruiter(recruiter1);
+            // Candidate applies
+            var application = candidate.ApplyForJob(job);
+            manager.AddJobApplication(application);
+            Console.WriteLine($"Candidate applied for: {application.Job.Title}");
+            Console.WriteLine("Candidate AppliedJobs count: " + candidate.AppliedJobs.Count);
 
-        Console.WriteLine("Added candidate: " + candidate1.GetInfo());
-        Console.WriteLine("Added recruiter: " + recruiter1.GetInfo());
+            // Recruiter reviews the application (should add an Interview with feedback "Top!")
+            recruiter.ReviewApplication(application);
+            Console.WriteLine("Recruiter reviewed application.");
 
-        var softwareDeveloper = new Job(
-            "Software Developer",
-            "Develop and maintain software applications.",
-            40000,
-            70000,
-            skills);
-
-        var howest = new Company("Howest", "IT");
-        companies.Add(howest);
-
-        howest.AddJob(softwareDeveloper);
-
-        recruiter1.PostJob(howest, softwareDeveloper);
-        Console.WriteLine("Posted job: " + softwareDeveloper.Title + " at " + howest.Name);
-
-        // --- Candidate method tests start here ---
-
-        // Test ApplyForJob: should return a JobApplication and be added to AppliedJobs
-        Console.WriteLine("\nTesting Candidate.ApplyForJob...");
-        var applicationFromCandidate = candidate1.ApplyForJob(softwareDeveloper);
-        jobApplications.Add(applicationFromCandidate);
-        manager.AddJobApplication(applicationFromCandidate);
-
-        Console.WriteLine("Application created for job: " + applicationFromCandidate.Job.Title);
-        Console.WriteLine("Candidate AppliedJobs count: " + candidate1.AppliedJobs.Count);
-
-        // Verify the added application references the candidate
-        var addedApp = candidate1.AppliedJobs[0];
-        Console.WriteLine("AppliedJobs[0] candidate: " + addedApp.Candidate.FullName);
-
-        // Test SetResume: replace resume and inspect skills count
-        Console.WriteLine("\nTesting Candidate.SetResume...");
-        var newSkills = new List<Skill> { new("Python Programming", 4) };
-        var newResume = new Resume(newSkills);
-        candidate1.SetResume(newResume);
-        Console.WriteLine("Resume replaced. Current resume skills count: " + candidate1.Resume.Skills.Count);
-
-        // Test ApplyForJob null argument handling (expect ArgumentNullException)
-        Console.WriteLine("\nTesting ApplyForJob with null job (expect handled exception)...");
-        try
-        {
-            candidate1.ApplyForJob(null);
-            Console.WriteLine("ApplyForJob(null) did NOT throw (unexpected).");
-        }
-        catch (ArgumentNullException ex)
-        {
-            Console.WriteLine("Caught expected exception: " + ex.GetType().Name + " - " + ex.ParamName);
-        }
-
-        // --- Candidate method tests end here ---
-
-        Console.WriteLine("\nCandidates list:");
-        foreach (var c in candidates)
-            Console.WriteLine("- " + c.GetInfo());
-
-        Console.WriteLine("\nRecruiters list:");
-        foreach (var r in recruiters)
-            Console.WriteLine("- " + r.GetInfo());
-
-        Console.WriteLine("\nCompanies and their jobs:");
-        foreach (var comp in companies)
-        {
-            Console.WriteLine("- " + comp.Name);
-            if (comp.Jobs.Count > 0)
+            // Simple attempt to read any interview feedback (if Interview collection/property is public)
+            if (application is not null)
             {
-                foreach (var j in comp.Jobs)
-                    Console.WriteLine("  * " + j.Title + ": " + j.Description);
-            }
-            else
-            {
-                Console.WriteLine("  (no jobs)");
-            }
-        }
-
-        // Use the previously created applicationFromCandidate for recruiter review
-        recruiter1.ReviewApplication(applicationFromCandidate);
-        Console.WriteLine("\nJob application reviewed by recruiter.");
-
-        // Reflection-based attempt to find interviews and their feedback (robust to property/field naming)
-        Console.WriteLine("\nInterviews found for the application:");
-        bool foundAny = false;
-
-        // Check public properties
-        foreach (var prop in applicationFromCandidate.GetType()
-                     .GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var val = prop.GetValue(applicationFromCandidate);
-            if (val == null) continue;
-
-            if (val is Interview singleInterview)
-            {
-                foundAny = true;
-                PrintInterviewFeedback(singleInterview);
-            }
-            else if (val is System.Collections.IEnumerable enumerable)
-            {
-                foreach (var item in enumerable)
+                var interviewsProp = application.GetType().GetProperty("Interviews");
+                if (interviewsProp?.GetValue(application) is IEnumerable<Interview> interviews)
                 {
-                    if (item is Interview interviewItem)
-                    {
-                        foundAny = true;
-                        PrintInterviewFeedback(interviewItem);
-                    }
+                    foreach (var it in interviews)
+                        Console.WriteLine("Interview feedback: " +
+                                          (it.GetType().GetProperty("Feedback")?.GetValue(it) ??
+                                           "(no feedback property)"));
                 }
             }
-        }
 
-        // Check public fields as well (in case interviews are stored in a field)
-        foreach (var field in applicationFromCandidate.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var val = field.GetValue(applicationFromCandidate);
-            if (val == null) continue;
+            // Resume tests: AddSkill and AddExperience (duplicate check)
+            Console.WriteLine("Resume skills before: " + resume.Skills.Count);
+            resume.AddSkill(new Skill("Go Programming", 3));
+            Console.WriteLine("Resume skills after: " + resume.Skills.Count);
 
-            if (val is Interview singleInterview)
+            try
             {
-                foundAny = true;
-                PrintInterviewFeedback(singleInterview);
+                var exp = new WorkExperience("Contoso", new DateTime(2018, 1, 1), new DateTime(2020, 1, 1),
+                    "Developer");
+                resume.AddExperience(exp);
+                Console.WriteLine("Added work experience. Count: " + resume.Experiences.Count);
+
+                // adding same experience again should throw per spec
+                resume.AddExperience(exp);
+                Console.WriteLine("Duplicate experience added (unexpected).");
             }
-            else if (val is System.Collections.IEnumerable enumerable)
+            catch (Exception ex)
             {
-                foreach (var item in enumerable)
-                {
-                    if (item is Interview interviewItem)
-                    {
-                        foundAny = true;
-                        PrintInterviewFeedback(interviewItem);
-                    }
-                }
+                Console.WriteLine("Expected exception on duplicate experience: " + ex.Message);
             }
-        }
 
-        if (!foundAny)
-        {
-            Console.WriteLine("  (no interviews found or unable to read interview details)");
-        }
-    }
+            // Minimal WorkExperience.GetExperienceInYears test
+            var testExp = new WorkExperience("Acme", new DateTime(2015, 6, 1), new DateTime(2018, 6, 1), "Engineer");
+            Console.WriteLine("Experience in years: " + testExp.GetExperienceInYears());
 
-    static void PrintInterviewFeedback(Interview interview)
-    {
-        var t = interview.GetType();
-        var fbProp = t.GetProperty("Feedback", BindingFlags.Public | BindingFlags.Instance);
-        if (fbProp != null)
-        {
-            var fbVal = fbProp.GetValue(interview) as string;
-            Console.WriteLine("  - Feedback: " + fbVal);
-            return;
+            // Final lists
+            Console.WriteLine("\nFinal summary:");
+            Console.WriteLine("- Candidates: 1");
+            Console.WriteLine("- Recruiters: 1");
+            Console.WriteLine($"- Company {company.Name} jobs: {company.Jobs.Count}");
         }
-
-        var fbField = t.GetField("feedback", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        if (fbField != null)
-        {
-            var fbVal = fbField.GetValue(interview) as string;
-            Console.WriteLine("  - Feedback: " + fbVal);
-            return;
-        }
-
-        Console.WriteLine("  - Interview instance of type: " + t.Name);
     }
 }
