@@ -25,6 +25,14 @@ public class Candidate : Person
         AppliedJobs.Add(application);
         return application;
     }
+    
+    // Calls the CalculateMatchScore extension method implemented in ApplicationManagerExtensions
+    public int GetMatchScore(Job job)
+    {
+        if (job == null) throw new ArgumentNullException(nameof(job));
+        return ApplicationManagerExtensions.CalculateMatchScore(this, job);
+    }
+    
 
     public override string GetInfo()
     {

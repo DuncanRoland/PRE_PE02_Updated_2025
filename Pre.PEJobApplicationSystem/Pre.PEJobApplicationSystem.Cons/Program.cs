@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Pre.PEJobApplicationSystem.Core;
+﻿using Pre.PEJobApplicationSystem.Core;
 
 namespace Pre.PEJobApplicationSystem.Cons
 {
@@ -16,9 +14,42 @@ namespace Pre.PEJobApplicationSystem.Cons
             var recruiter = new Recruiter("Sofie", "De Smet", "Sofie@desmet.be");
 
             var manager = new ApplicationManager();
+
+            // Existing add methods (keep for backward compatibility)
             manager.AddCandidate(candidate);
             manager.AddRecruiter(recruiter);
 
+            // --- Ensure interface methods are exercised ---
+            manager.RegisterCandidate(candidate); // RegisterCandidate
+            var company = new Company("Howest", "IT");
+            manager.RegisterCompany(company); // RegisterCompany
+
+            var job = new Job("Software Developer", "Develop apps", 40000, 70000, new List<Skill>(skills));
+
+            // Show candidate->job match score (uses Candidate.GetMatchScore which calls the extension)
+            var matchScore = candidate.GetMatchScore(job);
+            Console.WriteLine($"Match score for {candidate.FullName} and job '{job.Title}': {matchScore}");
+
+            
+            // PostJob via manager (uses company reference and job parameters)
+            manager.PostJob(company, job.Title, job.Description, job.MinSalary, job.MaxSalary,
+                new List<Skill>(job.RequiredSkills));
+            Console.WriteLine($"Manager.PostJob: company '{company.Name}' now has {company.Jobs.Count} job(s).");
+
+            // Create an application and apply via manager.Apply
+            var managerApplication = new JobApplication(candidate, job);
+            manager.Apply(managerApplication);
+            Console.WriteLine("Manager.Apply: added a job application via manager.Apply.");
+
+            // MatchCandidateToJobs (uses jobs from first company and extension method)
+            var matches = manager.MatchCandidateToJobs(candidate);
+            Console.WriteLine($"MatchCandidateToJobs returned {matches.Count} match(es):");
+            foreach (var m in matches)
+            {
+                Console.WriteLine($" - {m.Title} at {company.Name}");
+            }
+
+            // --- rest of original tests follow ---
             Console.WriteLine("Candidate added: " + candidate.GetInfo());
             Console.WriteLine("Recruiter added: " + recruiter.GetInfo());
 
@@ -52,10 +83,7 @@ namespace Pre.PEJobApplicationSystem.Cons
                 Console.WriteLine("Expected exception for SetLevel(6): " + ex.Message);
             }
 
-            // Create company and job, post it
-            var job = new Job("Software Developer", "Develop apps", 40000, 70000, new List<Skill>(skills));
-            var company = new Company("Howest", "IT");
-            company.AddJob(job);
+            // Use company and job already posted above
             recruiter.PostJob(company, job);
             Console.WriteLine($"Posted job '{job.Title}' at {company.Name}");
 
@@ -107,7 +135,7 @@ namespace Pre.PEJobApplicationSystem.Cons
             job.AddRequiredSkill(new Skill("SQL", 4));
             Console.WriteLine("Required skills after: " + job.RequiredSkills.Count);
 
-            // Candidate applies once
+            // Candidate applies once (original flow)
             var application = candidate.ApplyForJob(job);
             manager.AddJobApplication(application);
             Console.WriteLine($"\nCandidate applied for: {application.Job.Title}");

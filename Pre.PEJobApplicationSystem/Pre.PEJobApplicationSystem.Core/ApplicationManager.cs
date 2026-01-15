@@ -85,6 +85,9 @@ public class ApplicationManager : IApplicationManager
             jobs.Add(job);
         }
 
-        return jobs;
+        //return jobs;
+        
+        //use extension method
+        return jobs.FindBestMatches(candidate);
     }
 }
