@@ -22,7 +22,6 @@ public class Program
 
         var manager = new ApplicationManager();
 
-
         var candidates = new List<Candidate> { candidate1 };
         var recruiters = new List<Recruiter> { recruiter1 };
         var companies = new List<Company>();
@@ -41,15 +40,49 @@ public class Program
             70000,
             skills);
 
-        //var howest = new Company("Howest", "Information Technologies");
         var howest = new Company("Howest", "IT");
         companies.Add(howest);
-        
+
         howest.AddJob(softwareDeveloper);
 
         recruiter1.PostJob(howest, softwareDeveloper);
         Console.WriteLine("Posted job: " + softwareDeveloper.Title + " at " + howest.Name);
 
+        // --- Candidate method tests start here ---
+
+        // Test ApplyForJob: should return a JobApplication and be added to AppliedJobs
+        Console.WriteLine("\nTesting Candidate.ApplyForJob...");
+        var applicationFromCandidate = candidate1.ApplyForJob(softwareDeveloper);
+        jobApplications.Add(applicationFromCandidate);
+        manager.AddJobApplication(applicationFromCandidate);
+
+        Console.WriteLine("Application created for job: " + applicationFromCandidate.Job.Title);
+        Console.WriteLine("Candidate AppliedJobs count: " + candidate1.AppliedJobs.Count);
+
+        // Verify the added application references the candidate
+        var addedApp = candidate1.AppliedJobs[0];
+        Console.WriteLine("AppliedJobs[0] candidate: " + addedApp.Candidate.FullName);
+
+        // Test SetResume: replace resume and inspect skills count
+        Console.WriteLine("\nTesting Candidate.SetResume...");
+        var newSkills = new List<Skill> { new("Python Programming", 4) };
+        var newResume = new Resume(newSkills);
+        candidate1.SetResume(newResume);
+        Console.WriteLine("Resume replaced. Current resume skills count: " + candidate1.Resume.Skills.Count);
+
+        // Test ApplyForJob null argument handling (expect ArgumentNullException)
+        Console.WriteLine("\nTesting ApplyForJob with null job (expect handled exception)...");
+        try
+        {
+            candidate1.ApplyForJob(null);
+            Console.WriteLine("ApplyForJob(null) did NOT throw (unexpected).");
+        }
+        catch (ArgumentNullException ex)
+        {
+            Console.WriteLine("Caught expected exception: " + ex.GetType().Name + " - " + ex.ParamName);
+        }
+
+        // --- Candidate method tests end here ---
 
         Console.WriteLine("\nCandidates list:");
         foreach (var c in candidates)
@@ -74,12 +107,8 @@ public class Program
             }
         }
 
-        var jobApplication1 = new JobApplication(candidate1, softwareDeveloper);
-        jobApplications.Add(jobApplication1);
-        manager.AddJobApplication(jobApplication1);
-
-        // Call the method under test
-        recruiter1.ReviewApplication(jobApplication1);
+        // Use the previously created applicationFromCandidate for recruiter review
+        recruiter1.ReviewApplication(applicationFromCandidate);
         Console.WriteLine("\nJob application reviewed by recruiter.");
 
         // Reflection-based attempt to find interviews and their feedback (robust to property/field naming)
@@ -87,9 +116,10 @@ public class Program
         bool foundAny = false;
 
         // Check public properties
-        foreach (var prop in jobApplication1.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var prop in applicationFromCandidate.GetType()
+                     .GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            var val = prop.GetValue(jobApplication1);
+            var val = prop.GetValue(applicationFromCandidate);
             if (val == null) continue;
 
             if (val is Interview singleInterview)
@@ -111,9 +141,9 @@ public class Program
         }
 
         // Check public fields as well (in case interviews are stored in a field)
-        foreach (var field in jobApplication1.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+        foreach (var field in applicationFromCandidate.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
-            var val = field.GetValue(jobApplication1);
+            var val = field.GetValue(applicationFromCandidate);
             if (val == null) continue;
 
             if (val is Interview singleInterview)
@@ -142,7 +172,6 @@ public class Program
 
     static void PrintInterviewFeedback(Interview interview)
     {
-        // Try to get a public property named Feedback (or a field) to display the value
         var t = interview.GetType();
         var fbProp = t.GetProperty("Feedback", BindingFlags.Public | BindingFlags.Instance);
         if (fbProp != null)
@@ -160,7 +189,6 @@ public class Program
             return;
         }
 
-        // Fallback: print the interview's type name
         Console.WriteLine("  - Interview instance of type: " + t.Name);
     }
 }

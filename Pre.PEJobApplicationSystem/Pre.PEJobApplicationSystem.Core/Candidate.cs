@@ -9,14 +9,21 @@ public class Candidate : Person
         base(firstName, lastName, email)
     {
         Resume = resume;
+        AppliedJobs = new List<JobApplication>();
+    }
+    
+    public void SetResume(Resume resume)
+    {
+        Resume = resume ?? throw new ArgumentNullException(nameof(resume));
     }
 
     public JobApplication ApplyForJob(Job job)
     {
+        if (job == null) throw new ArgumentNullException(nameof(job));
+        
         var application = new JobApplication(this, job);
         AppliedJobs.Add(application);
         return application;
- 
     }
 
     public override string GetInfo()
