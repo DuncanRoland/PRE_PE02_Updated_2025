@@ -20,6 +20,37 @@ namespace Pre.PEJobApplicationSystem.Cons
             Console.WriteLine("Candidate added: " + candidate.GetInfo());
             Console.WriteLine("Recruiter added: " + recruiter.GetInfo());
 
+            // --- Test SetLevel on Skill ---
+            var testSkill = new Skill("TestSkill", 3);
+            Console.WriteLine("Initial TestSkill level: " + testSkill.Level);
+
+            // valid
+            testSkill.SetLevel(4);
+            Console.WriteLine("After SetLevel(4): " + testSkill.Level);
+
+            // invalid low
+            try
+            {
+                testSkill.SetLevel(0);
+                Console.WriteLine("SetLevel(0) did NOT throw (unexpected).");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Expected exception for SetLevel(0): " + ex.Message);
+            }
+
+            // invalid high
+            try
+            {
+                testSkill.SetLevel(6);
+                Console.WriteLine("SetLevel(6) did NOT throw (unexpected).");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Expected exception for SetLevel(6): " + ex.Message);
+            }
+
+            // Continue with original program flow
             // Create company and job, post it
             var job = new Job("Software Developer", "Develop apps", 40000, 70000, skills);
             var company = new Company("Howest", "IT");

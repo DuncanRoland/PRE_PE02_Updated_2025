@@ -10,4 +10,11 @@ public class Skill
         Name = name;
         Level = level;
     }
+
+    public void SetLevel(int level)
+    {
+        if (level < 1 || level > 5)
+            throw new ArgumentOutOfRangeException("The number must be between 1 and 5.");
+        Level = level;
+    }
 }
