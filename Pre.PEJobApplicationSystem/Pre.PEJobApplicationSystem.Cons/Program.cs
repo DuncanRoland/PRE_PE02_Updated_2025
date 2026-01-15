@@ -50,23 +50,83 @@ namespace Pre.PEJobApplicationSystem.Cons
                 Console.WriteLine("Expected exception for SetLevel(6): " + ex.Message);
             }
 
-            // Continue with original program flow
             // Create company and job, post it
-            var job = new Job("Software Developer", "Develop apps", 40000, 70000, skills);
+            var job = new Job("Software Developer", "Develop apps", 40000, 70000, new List<Skill>(skills));
             var company = new Company("Howest", "IT");
             company.AddJob(job);
             recruiter.PostJob(company, job);
             Console.WriteLine($"Posted job '{job.Title}' at {company.Name}");
 
-            // Candidate applies
+            // Test Job.SetMinSalary / SetMaxSalary validations
+            Console.WriteLine("\nTesting Job salary setters:");
+            try
+            {
+                job.SetMinSalary(50); // invalid low
+                Console.WriteLine("SetMinSalary(50) did NOT throw (unexpected).");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Expected exception for SetMinSalary(50): " + ex.Message);
+            }
+
+            try
+            {
+                job.SetMinSalary(150); // valid
+                Console.WriteLine("SetMinSalary(150) succeeded. MinSalary: " + job.MinSalary);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Unexpected exception for SetMinSalary(150): " + ex.Message);
+            }
+
+            try
+            {
+                job.SetMaxSalary(1_500_000); // invalid high
+                Console.WriteLine("SetMaxSalary(1500000) did NOT throw (unexpected).");
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Expected exception for SetMaxSalary(1500000): " + ex.Message);
+            }
+
+            try
+            {
+                job.SetMaxSalary(900000); // valid
+                Console.WriteLine("SetMaxSalary(900000) succeeded. MaxSalary: " + job.MaxSalary);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine("Unexpected exception for SetMaxSalary(900000): " + ex.Message);
+            }
+
+            // Test AddRequiredSkill
+            Console.WriteLine("\nTesting AddRequiredSkill:");
+            Console.WriteLine("Required skills before: " + job.RequiredSkills.Count);
+            job.AddRequiredSkill(new Skill("SQL", 4));
+            Console.WriteLine("Required skills after: " + job.RequiredSkills.Count);
+
+            // Candidate applies once
             var application = candidate.ApplyForJob(job);
             manager.AddJobApplication(application);
-            Console.WriteLine($"Candidate applied for: {application.Job.Title}");
+            Console.WriteLine($"\nCandidate applied for: {application.Job.Title}");
             Console.WriteLine("Candidate AppliedJobs count: " + candidate.AppliedJobs.Count);
+
+            // Check eligibility (should be false)
+            Console.WriteLine("\nChecking candidate eligibility (expect false): " + job.IsCandidateEligible(candidate));
+
+            // Add more applications to reach 10 and re-check eligibility
+            for (int i = 0; i < 9; i++)
+            {
+                var app = candidate.ApplyForJob(job);
+                manager.AddJobApplication(app);
+            }
+
+            Console.WriteLine("Candidate AppliedJobs count after additional applies: " + candidate.AppliedJobs.Count);
+            Console.WriteLine("Checking candidate eligibility (expect true): " + job.IsCandidateEligible(candidate));
 
             // Recruiter reviews the application (should add an Interview with feedback "Top!")
             recruiter.ReviewApplication(application);
-            Console.WriteLine("Recruiter reviewed application.");
+            Console.WriteLine("\nRecruiter reviewed application.");
 
             // Simple attempt to read any interview feedback (if Interview collection/property is public)
             if (application is not null)
@@ -82,7 +142,7 @@ namespace Pre.PEJobApplicationSystem.Cons
             }
 
             // Resume tests: AddSkill and AddExperience (duplicate check)
-            Console.WriteLine("Resume skills before: " + resume.Skills.Count);
+            Console.WriteLine("\nResume skills before: " + resume.Skills.Count);
             resume.AddSkill(new Skill("Go Programming", 3));
             Console.WriteLine("Resume skills after: " + resume.Skills.Count);
 
